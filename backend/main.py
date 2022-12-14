@@ -3,29 +3,12 @@ from Model.Word import Word
 from Controllers.WordController import WordController
 from fastapi import FastAPI, Request, Header, Response
 from fastapi.middleware.cors import CORSMiddleware
+import time
 
-tree = ET.parse('data/verbetesWikipedia.xml') 
-root = tree.getroot()
-
-words = []
-
-words.sort(key=lambda x: x['relevancia'], reverse=True)
-
-for page in root.findall('page'):
-    words.append(Word(page.find('title').text.lower()))
-
-for page in root.findall('page'):
-    for word in words:
-        if len(word.word) > 3:
-            if word.isTitle(page.find('title').text):
-                word.isText(page.find('text').text)
-                # print(word.__str__())
-
-searchResponse = WordController.searchWord('computer', words)
-
-
+inicio = time.time()
 
 app = FastAPI()
+print("Servidor Iniciado")
 
 origins = [
     "http://localhost",
@@ -42,9 +25,38 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+tree = ET.parse('data/verbetesWikipedia.xml') 
+root = tree.getroot()
 
+words = WordController.initIndex(root)
+
+nonStopWords = WordController.searchNonStopWords(words)
+response = WordController.fitWords(words, nonStopWords)
+
+fim = time.time()
+print("Tempo de execução: ", fim - inicio)
 @app.get("/search")
 async def root(request: Request):
     word = request.headers['word']
-    searchResponse = WordController.searchWord(word, words)
+    print("Procurando pela palavra: ", word)
+    searchResponse = WordController.findByWord(word, words)
+    # searchResponse = WordController.searchWord(word, words)
+    # searchResponse = WordController.searchWordByPoints(word, words,significantWords)
+
+    print("Tempo de execução: ", fim - inicio)
     return {"data": searchResponse}
+
+@app.get("/findTwoWords")
+async def root(request: Request):
+    word1 = request.headers['word1']
+    word2 = request.headers['word2']
+    print("Procurando pelas palavras: ", word1, word2)
+    searchResponse = WordController.findByTwoWords(word1, words)
+    searchResponse2 = WordController.findByTwoWords(word2, words)
+    # searchResponse = WordController.searchWord(word, words)
+    # searchResponse = WordController.searchWordByPoints(word, words,significantWords)
+    response = searchResponse + searchResponse2
+    response.sort(key=lambda x: x.points, reverse=True)
+    response = set(response)
+    print("Tempo de execução: ", fim - inicio)
+    return {"data": response}
