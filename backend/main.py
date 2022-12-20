@@ -40,8 +40,6 @@ async def root(request: Request):
     word = request.headers['word']
     print("Procurando pela palavra: ", word)
     searchResponse = WordController.findByWord(word, words)
-    # searchResponse = WordController.searchWord(word, words)
-    # searchResponse = WordController.searchWordByPoints(word, words,significantWords)
 
     print("Tempo de execução: ", fim - inicio)
     return {"data": searchResponse}
@@ -53,9 +51,9 @@ async def root(request: Request):
     print("Procurando pelas palavras: ", word1, word2)
     searchResponse = WordController.findByTwoWords(word1, words)
     searchResponse2 = WordController.findByTwoWords(word2, words)
-    # searchResponse = WordController.searchWord(word, words)
-    # searchResponse = WordController.searchWordByPoints(word, words,significantWords)
+
     response = searchResponse + searchResponse2
+
     response.sort(key=lambda x: x.points, reverse=True)
     response = set(response)
     print("Tempo de execução: ", fim - inicio)

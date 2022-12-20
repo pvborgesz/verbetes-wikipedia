@@ -52,8 +52,21 @@ function App() {
   };
 
   useEffect(() => {
+    const sorted = responseSearch.sort((a: any, b: any) => {
+      return b.points - a.points;
+    });
+
+    const filtered = sorted.filter((item: any, index: number) => {
+      return (
+        sorted.findIndex((item2: any) => item2.title === item.title) === index
+      );
+    });
+
+    setResponseSearch(filtered);
     console.log(responseSearch, "responseSearch");
   }, [responseSearch]);
+
+  useEffect(() => {}, [responseSearch]);
 
   // useEffect(() => {
   //   api

@@ -127,9 +127,9 @@ class WordController:
                     # i dont wanna repetead words
                     if i not in response:
                         response.append(words[i])
-        try: 
-            response.sort(key=lambda x: x.points, reverse=True)
-        except: pass
+        
+        response.sort(key=lambda x: x.points, reverse=True)
+        
         response = set(response)
         return response
 
